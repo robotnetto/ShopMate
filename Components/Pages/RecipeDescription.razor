@@ -1,0 +1,165 @@
+﻿@inject IRecipe Recipe
+@page "/description/{Id}"
+@inject NavigationManager nav
+
+<MudAppBar Color="Color.Inherit">
+    <MudIcon Icon="@Icons.Material.Outlined.RamenDining" Color="Color.Inherit" />
+    <MudText Class="ml-2" Typo="Typo.h6" Color="Color.Inherit">@_recipe.Title</MudText>
+    <MudSpacer />
+
+</MudAppBar>
+
+<MudCard Class="mt-5 mx-2 ">
+    @if (string.IsNullOrEmpty(_recipe.ImageStream))
+    {
+        <MudElement Class="d-flex my-2 justify-content-center align-items-center" Style="height: 100%;">
+            <MudButton StartIcon="@Icons.Material.Filled.CloudUpload" IconSize="Size.Medium" Variant="Variant.Text" Style="width:50%;" Color="Color.Inherit" OnClick="ImageUpload">Upload image</MudButton>
+        </MudElement>  
+    }
+    else
+    {
+        <MudCardMedia Image="@_recipe.ImageStream" Height="160" />
+    }
+
+    <MudDivider />
+
+    <MudCardActions Class="d-flex ">
+@*         <MudRating @bind-SelectedValue="_recipe.Rate" />
+ *@        <MudSpacer />
+        <MudIconButton Variant="Variant.Text" DisableRipple="false" Icon="@Icons.Material.Filled.Settings" Color="Color.Inherit" OnClick="@(()=>OpenDrawer("Settings"))" />
+    </MudCardActions>
+    <MudCardContent>
+
+        <MudElement Class="d-flex flex-column flex-grow-1 ma-1 mt-n4">
+
+            <MudTextField @bind-Value="_recipe.Description" TextUpdateSuppression="false" Immediate="true" AutoGrow Lines="3" InputType="InputType.Text" InputMode="InputMode.text" Variant="Variant.Outlined"></MudTextField>
+            <MudFab Class="mt-3" EndIcon="@Icons.Material.Filled.Save" OnClick="OnDescription" Label="Save" Color="Color.Primary" />
+        </MudElement>
+    </MudCardContent>
+</MudCard>
+
+@* ----Drawer---- *@
+<MudDrawer @bind-Open="@settingsDrawer" Anchor="Anchor.Bottom" Elevation="4" Variant="@DrawerVariant.Temporary" Color="Color.Inherit" Breakpoint="Breakpoint.LgAndUp">
+
+    <MudElement Class="d-flex flex-column flex-grow-1 ma-4">
+        <MudDrawerHeader Class="pl-1">
+            <MudText Typo="Typo.h6">Settings</MudText>
+        </MudDrawerHeader>
+
+        <MudFab Class="mb-3" EndIcon="@Icons.Material.Filled.DriveFileRenameOutline" OnClick="ImageUpload" Label="Upload image" Color="Color.Tertiary" />
+
+        <MudFab EndIcon="@Icons.Material.Filled.Delete" Label="Delete image" Color="Color.Error" OnClick="DeleteImage" />
+
+    </MudElement>
+</MudDrawer>
+
+
+
+@code {
+    [Parameter] public string Id { get; set; }
+    private Recipe _recipe = new();
+    bool toggleText = false;
+    bool settingsDrawer;
+
+    protected async override Task OnInitializedAsync()
+    {
+        App.Current.On<Microsoft.Maui.Controls.PlatformConfiguration.Android>().UseWindowSoftInputModeAdjust(WindowSoftInputModeAdjust.Resize);
+
+        _recipe = await Recipe.GetByIdAsync(Convert.ToInt32(Id));
+
+    }
+
+    void OpenDrawer(string drawType)
+    {
+
+        if (drawType == "Settings")
+        {
+            settingsDrawer = true;
+
+        }
+
+
+    }
+    private async Task OnDescription()
+    {
+        await Recipe.UpdateAsync(_recipe);
+        nav.NavigateTo("/");
+    }
+
+    private async void DeleteImage()
+    {
+        if (_recipe.Id != 0)
+        {
+            _recipe.ImageStream = string.Empty;
+            await Recipe.UpdateAsync(_recipe);
+            settingsDrawer = false;
+            StateHasChanged();
+        }
+    }
+
+    private async Task ImageUpload()
+    {
+        // var image = await MediaPicker.PickPhotoAsync(new MediaPickerOptions
+        //     {
+        //         Title = "Select a photo"
+        //     });
+        // if (image != null)
+        // {
+
+        //     try
+        //     {
+        //         var stream = await image.OpenReadAsync();
+
+        //         var fileName = $"selectedImage_{DateTime.Now.ToString("yyyyMMddHHmmss")}.jpg";
+
+        //         imagePath = await fileService.SaveImageAsync(stream , fileName);
+        //         bool fileExists = File.Exists(imagePath);
+
+
+        //         StateHasChanged();
+
+        //     }
+        //     catch (Exception ex)
+        //     {
+
+        //     }
+        // }
+        var image = await MediaPicker.PickPhotoAsync(new MediaPickerOptions
+            {
+                Title = "Select a photo"
+            });
+        if (image != null)
+        {
+
+            try
+            {
+                var stream = await image.OpenReadAsync();
+
+                using var reader = new StreamReader(stream);
+
+                byte[] result;
+                using (var streamReader = new MemoryStream())
+                {
+                    stream.CopyTo(streamReader);
+                    result = streamReader.ToArray();
+                }
+                var imagePath = Convert.ToBase64String(result);
+                imagePath = string.Format("data:image/png;base64,{0}", imagePath);
+
+                _recipe.ImageStream = imagePath;
+
+                await Recipe.UpdateAsync(_recipe);
+
+                settingsDrawer = false;
+                StateHasChanged();
+
+            }
+            catch (Exception ex)
+            {
+
+            }
+        }
+
+    }
+
+}

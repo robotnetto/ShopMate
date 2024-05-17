@@ -1,0 +1,170 @@
+﻿@page "/counter"
+@inject IShopCart ShopCart
+
+<MudAppBar Color="Color.Inherit">
+    <MudIcon Icon="@Icons.Material.Filled.PlaylistAddCheck" Color="Color.Inherit" />
+    <MudText Class="ml-2" Typo="Typo.h6" Color="Color.Inherit">My List</MudText>
+    <MudSpacer />
+
+    <MudButton Variant="Variant.Text" DisableRipple="false" EndIcon="@Icons.Material.Filled.Add" Color="Color.Inherit" OnClick="@(()=> OpenDrawer(Options.New))">Add</MudButton>
+
+</MudAppBar>
+
+@* ----Content---- *@
+@if (ShopListCart == null || !ShopListCart.Any() || hasError)
+{
+    <MudElement Class="d-flex justify-content-center mt-7">
+        <MudText>@Message</MudText>
+    </MudElement>
+}
+else
+{
+    foreach (var item in ShopListCart)
+    {
+         <MudStack AlignItems="AlignItems.Center" Class="mt-5">
+            <MudCard Style="width: 90%;" Elevation="3" Class="card-container ">
+
+                <MudCardHeader>
+                    <CardHeaderContent>
+                        <MudButton StartIcon="@Icons.Material.Filled.ShoppingBasket" Variant="Variant.Text" Href="@($"cartItems/{item.Id}")" Color="Color.Inherit">@item.Title</MudButton>
+                    </CardHeaderContent>
+                    <CardHeaderActions>
+                        <MudIconButton Icon="@Icons.Material.Filled.MoreVert" Color="Color.Default" OnClick="@(()=>{ selectedShopCart = item; OpenDrawer(Options.Setting);})" />
+                    </CardHeaderActions>
+                </MudCardHeader>
+          
+            </MudCard>
+         </MudStack>
+    }
+}
+@* ----Settings Drawer---- *@
+<MudDrawer @bind-Open="@settingsDrawer" Anchor="Anchor.Bottom" Elevation="4" Variant="@DrawerVariant.Temporary" Color="Color.Inherit" Breakpoint="Breakpoint.LgAndUp">
+
+
+    <MudElement Class="d-flex flex-column flex-grow-1 ma-4">
+        <MudDrawerHeader Class="pl-1">
+            <MudText Typo="Typo.h6">Settings</MudText>
+        </MudDrawerHeader>
+        @*         <ShopDialog Recipe="@selectedRecipe" UpdateRecipe="UpdateRecipe" />
+        *@
+        <MudFab Class="mb-3" EndIcon="@Icons.Material.Filled.DriveFileRenameOutline" OnClick="@( ()=> OpenDrawer(Options.Edit))" Label="Edit name" Color="Color.Tertiary" />
+
+        <MudFab EndIcon="@Icons.Material.Filled.Delete" OnClick="@(()=>DeleteCartAsync(selectedShopCart))" Label="Delete" Color="Color.Error" />
+
+    </MudElement>
+</MudDrawer>
+@* ----Add---- *@
+<MudDrawer @bind-Open="@newDrawer" Anchor="Anchor.Bottom" Elevation="3" Variant="@DrawerVariant.Temporary" Color="Color.Inherit">
+
+    <DrawForm type="ObjectType.ShopList" options="Options.New" AddAndEditShopCart="AddNewShopList" />
+
+</MudDrawer>
+
+@* ----Edit---- *@
+
+<MudDrawer @bind-Open="@editDrawer" Anchor="Anchor.Bottom" Elevation="3" Variant="@DrawerVariant.Temporary" Color="Color.Inherit">
+
+    <DrawForm ShopCart="@selectedShopCart" type="ObjectType.ShopList" AddAndEditShopCart="UpdateCartAsync" options="@Options.Edit" />
+
+</MudDrawer>
+
+
+@code {
+    bool hasError;
+    public ShopCart selectedShopCart = new();
+    private IEnumerable<ShopCart>? ShopListCart { get; set; }
+    public string Message = string.Empty;
+    bool newDrawer;
+    bool settingsDrawer;
+    bool editDrawer;
+    void OpenDrawer(Options options)
+    {
+        if (options == Options.Edit)
+        {
+            settingsDrawer = false;
+            newDrawer = false;
+            editDrawer = true;
+
+        }
+        else if (options == Options.New)
+        {
+            settingsDrawer = false;
+            editDrawer = false;
+            newDrawer = true;
+
+
+        }
+        else if (options == Options.Setting)
+        {
+            editDrawer = false;
+            newDrawer = false;
+            settingsDrawer = true;
+
+        }
+
+    }
+    protected async override Task OnInitializedAsync()
+    {
+        App.Current.On<Microsoft.Maui.Controls.PlatformConfiguration.Android>().UseWindowSoftInputModeAdjust(WindowSoftInputModeAdjust.Resize);
+
+        await LoadShopListAsync();
+    }
+
+    private async Task AddNewShopList(ShopCart shopCart)
+    {
+        if (shopCart != null)
+        {
+            try
+            {
+                await ShopCart.CreateAsync(shopCart);
+                newDrawer = false;
+                await LoadShopListAsync();
+
+            }
+            catch (Exception ex)
+            {
+                Message = ex.Message;
+                hasError = true;
+                StateHasChanged();
+            }
+
+        }
+    }
+    private async Task LoadShopListAsync()
+    {
+        hasError = false;
+        try
+        {
+            ShopListCart = await ShopCart.GetAllasync();
+            if (!ShopListCart.Any())
+            {
+                Message = "List is empty!";
+
+            }
+            StateHasChanged();
+        }
+        catch (Exception ex)
+        {
+            Message = ex.Message;
+            hasError = true;
+            StateHasChanged();
+        }
+
+    }
+    private async Task DeleteCartAsync(ShopCart shopCart)
+    {
+        await ShopCart.DeleteAsync(shopCart);
+        settingsDrawer = false;
+        await LoadShopListAsync();
+    }
+
+    private async Task UpdateCartAsync(ShopCart shopCart)
+    {
+        if (shopCart.Id != 0)
+        {
+            await ShopCart.UpdateAsync(shopCart);
+            editDrawer = false;
+
+        }
+    }
+}

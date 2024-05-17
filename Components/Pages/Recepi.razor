@@ -1,0 +1,220 @@
+﻿@page "/"
+@inject IDialogService DialogService
+@inject IRecipe Recipe
+@inject NavigationManager nav
+
+
+@* -----Topbar---- *@
+<MudAppBar Color="Color.Inherit">
+    <MudIcon Icon="@Icons.Material.Outlined.RamenDining" Color="Color.Inherit" />
+    <MudText Class="ml-2" Typo="Typo.h6" Color="Color.Inherit">My Recipes</MudText>
+    <MudSpacer />
+
+    <MudButton Variant="Variant.Text" DisableRipple="false" EndIcon="@Icons.Material.Filled.Add" Color="Color.Inherit" OnClick="@(()=> OpenDrawer(Options.New))">Add</MudButton>
+
+</MudAppBar>
+
+@* ----Content---- *@
+@if (allrecipes == null || !allrecipes.Any() || hasError)
+{
+    <MudElement Class="d-flex justify-content-center mt-7">
+        <MudText>@Message</MudText>
+    </MudElement>
+}
+else
+{
+
+    @foreach (var item in allrecipes)
+    {
+        <MudStack AlignItems="AlignItems.Center" Class="mt-5">
+
+            <MudCard Style="width: 90%;" Elevation="3" Class="card-container ">
+                @if (string.IsNullOrEmpty(item.ImageStream))
+                {
+                    <MudElement Class="d-flex my-2 justify-content-center align-items-center">
+                        <MudIcon Icon="@Icons.Material.Filled.HideImage" Size="Size.Large" />
+                    </MudElement>
+
+                }
+                else
+                {
+
+                    <MudCardMedia Image="@item.ImageStream" Height="150" />
+                }
+                <MudCardContent Class="mt-n3 ">
+                    <MudButton Variant="Variant.Text" Href="@($"description/{item.Id}")" Color="Color.Inherit">@item.Title</MudButton>
+
+                </MudCardContent>
+                <MudCardActions Class="mt-n9 ">
+                    <MudCheckBox Class="ml-3" @bind-Value="@item.Favorite" Color="Color.Secondary" @oninput="()=> HandleFavoriteChange(item)" CheckedIcon="@Icons.Material.Filled.Favorite" UncheckedIcon="@Icons.Material.Filled.FavoriteBorder"></MudCheckBox>
+
+@*                     <MudRating Class="ml-3" ReadOnly="true" SelectedValue="item.Rate" />
+ *@                    <MudSpacer />
+
+                    <MudIconButton Icon="@Icons.Material.Filled.MoreVert" Color="Color.Default" OnClick="@(()=>{ selectedRecipe = item; OpenDrawer(Options.Setting);})" />
+                </MudCardActions>
+
+            </MudCard>
+        </MudStack>
+
+    }
+}
+@* ----Settings Drawer---- *@
+<MudDrawer @bind-Open="@settingsDrawer" Anchor="Anchor.Bottom" Elevation="4" Variant="@DrawerVariant.Temporary" Color="Color.Inherit" Breakpoint="Breakpoint.LgAndUp">
+
+
+    <MudElement Class="d-flex flex-column flex-grow-1 ma-4">
+        <MudDrawerHeader Class="pl-1">
+            <MudText Typo="Typo.h6">Settings</MudText>
+        </MudDrawerHeader>
+        @*         <ShopDialog Recipe="@selectedRecipe" UpdateRecipe="UpdateRecipe" />
+        *@
+        <MudFab Class="mb-3" EndIcon="@Icons.Material.Filled.DriveFileRenameOutline" OnClick="@( ()=> OpenDrawer(Options.Edit))" Label="Edit name" Color="Color.Tertiary" />
+
+        <MudFab EndIcon="@Icons.Material.Filled.Delete" OnClick="@(()=>DeleteRecipe(selectedRecipe))" Label="Delete" Color="Color.Error" />
+
+    </MudElement>
+</MudDrawer>
+
+@* ----Edit---- *@
+<MudDrawer @bind-Open="@editRecipeDrawer" Anchor="Anchor.Bottom" Elevation="3" Variant="@DrawerVariant.Temporary" Color="Color.Inherit">
+
+    <DrawForm Recipe="@selectedRecipe" type="ObjectType.Recipe" AddAndEditRecipe="UpdateRecipe" options="@Options.Edit" />
+
+</MudDrawer>
+
+@* ----Add---- *@
+<MudDrawer @bind-Open="@newRecipeDrawer" Anchor="Anchor.Bottom" Elevation="3" Variant="@DrawerVariant.Temporary" Color="Color.Inherit">
+
+    <DrawForm  AddAndEditRecipe="AddNewRecipe" type="ObjectType.Recipe" options="@Options.New" />
+
+</MudDrawer>
+
+
+@code {
+    // public Recipe _Recipe = new();
+    private IEnumerable<Recipe>? allrecipes { get; set; }
+    bool newRecipeDrawer;
+    bool settingsDrawer;
+    bool editRecipeDrawer;
+    string Message = string.Empty;
+    // private bool hasValue => !(string.IsNullOrEmpty(recipe.Title));
+    private bool hasError;
+    public Recipe selectedRecipe = new();
+
+
+    void OpenDrawer(Options options)
+    {
+
+        if (options == Options.Edit)
+        {
+            settingsDrawer = false;
+            newRecipeDrawer = false;
+            editRecipeDrawer = true;
+
+        }
+        else if (options == Options.New)
+        {
+            settingsDrawer = false;
+            editRecipeDrawer = false;
+            newRecipeDrawer = true;
+
+
+        }
+        else if (options == Options.Setting)
+        {
+            editRecipeDrawer = false;
+            newRecipeDrawer = false;
+            settingsDrawer = true;
+
+        }
+
+    }
+    protected async override Task OnInitializedAsync()
+    {
+        App.Current.On<Microsoft.Maui.Controls.PlatformConfiguration.Android>().UseWindowSoftInputModeAdjust(WindowSoftInputModeAdjust.Resize);
+        await LoadRecipesAsync();
+    }
+
+    private async Task HandleFavoriteChange(Recipe recipe)
+    {
+        await UpdateRecipe(recipe);
+
+    }
+
+    private async Task LoadRecipesAsync()
+    {
+        hasError = false;
+        try
+        {
+            allrecipes = await Recipe.GetAllAsync();
+            if (!allrecipes.Any())
+            {
+                Message = "No recipe on the list yet";
+
+            }
+
+            StateHasChanged();
+
+        }
+        catch (Exception ex)
+        {
+            Message = ex.Message;
+            hasError = true;
+            StateHasChanged();
+        }
+    }
+
+    private async Task AddNewRecipe(Recipe recipe)
+    {
+        if (recipe != null)
+        {
+            hasError = false;
+            try
+            {
+                await Recipe.CreateAsync(recipe);
+                newRecipeDrawer = false;
+
+                await LoadRecipesAsync();
+
+            }
+            catch (Exception ex)
+            {
+                Message = ex.Message;
+                hasError = true;
+                StateHasChanged();
+            }
+
+        }
+    }
+    private async Task UpdateRecipe(Recipe recipe)
+    {
+        if (recipe.Id != 0)
+        {
+            await Recipe.UpdateAsync(recipe);
+            editRecipeDrawer = false;
+        }
+    }
+
+    private async Task DeleteRecipe(Recipe recipe)
+    {
+        hasError = false;
+        try
+        {
+            if (recipe != null)
+            {
+                await Recipe.DeleteAsync(recipe);
+                settingsDrawer = false;
+                await LoadRecipesAsync();
+
+            }
+        }
+        catch (Exception ex)
+        {
+            Message = ex.Message;
+            hasError = true;
+            StateHasChanged();
+        }
+    }
+ 
+}

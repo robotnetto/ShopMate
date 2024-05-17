@@ -1,0 +1,176 @@
+﻿@page "/cartItems/{Id}"
+@inject IShopCart ShopCart
+
+<MudAppBar Color="Color.Inherit">
+    <MudIcon Icon="@Icons.Material.Filled.AddShoppingCart" Color="Color.Inherit" />
+    <MudText Class="ml-2" Typo="Typo.h6" Color="Color.Inherit">@_shopCart.Title</MudText>
+    <MudSpacer />
+
+    <MudButton Variant="Variant.Text" DisableRipple="false" EndIcon="@Icons.Material.Filled.Add" Color="Color.Inherit" OnClick="@(()=> OpenDrawer(Options.New))">Add</MudButton>
+
+</MudAppBar>
+@* @foreach (var item in items!)
+{
+    <MudStack AlignItems="AlignItems.Center" Class="mt-5">
+        <MudCard Style="width: 90%;" Elevation="3" Class="card-container ">
+
+            <MudCardHeader>
+                <CardHeaderContent>
+                    <MudButton Variant="Variant.Text" Color="Color.Inherit">@item.ItemName</MudButton>
+                </CardHeaderContent>
+
+            </MudCardHeader>
+
+        </MudCard>
+    </MudStack>
+
+} *@
+
+@if (items!.Any())
+{
+    <MudStack AlignItems="AlignItems.Center" Class="mt-5">
+        <MudPaper Style="width: 90%;" Elevation="3" Class="card-container ">
+
+            <MudChipSet Class="d-flex flex-column" @bind-SelectedChips="selected" MultiSelection="true" Filter="true">
+                @foreach (var item in items!)
+                {
+                    <MudElement Class="d-flex flex-row justify-content-between">
+                        <MudChip Text="@item.ItemName"></MudChip>
+                        <MudIconButton Icon="@Icons.Material.Filled.MoreVert" Color="Color.Default" OnClick="@(()=>{ selectedItem = item; OpenDrawer(Options.Setting);})" />
+                    </MudElement>
+                    <MudDivider Class="my-1" />
+                }
+            </MudChipSet>
+
+        </MudPaper>
+    </MudStack>
+
+}
+
+
+@* ----Settings Drawer---- *@
+<MudDrawer @bind-Open="@settingsDrawer" Anchor="Anchor.Bottom" Elevation="4" Variant="@DrawerVariant.Temporary" Color="Color.Inherit" Breakpoint="Breakpoint.LgAndUp">
+
+
+    <MudElement Class="d-flex flex-column flex-grow-1 ma-4">
+        <MudDrawerHeader Class="pl-1">
+            <MudText Typo="Typo.h6">Settings</MudText>
+        </MudDrawerHeader>
+        @*         <ShopDialog Recipe="@selectedRecipe" UpdateRecipe="UpdateRecipe" />
+        *@
+        <MudFab Class="mb-3" EndIcon="@Icons.Material.Filled.DriveFileRenameOutline" OnClick="@( ()=> OpenDrawer(Options.Edit))" Label="Edit name" Color="Color.Tertiary" />
+
+        <MudFab EndIcon="@Icons.Material.Filled.Delete" OnClick="@(()=>DeleteItemasync(selectedItem))" Label="Delete" Color="Color.Error" />
+
+    </MudElement>
+</MudDrawer>
+
+<MudDrawer @bind-Open="@newDrawer" Anchor="Anchor.Bottom" Elevation="3" Variant="@DrawerVariant.Temporary" Color="Color.Inherit">
+
+    <DrawForm type="ObjectType.Items" options="@Options.New" AddAndEditItem="AddNewItem" />
+
+</MudDrawer>
+
+<MudDrawer @bind-Open="@editDrawer" Anchor="Anchor.Bottom" Elevation="3" Variant="@DrawerVariant.Temporary" Color="Color.Inherit">
+
+    <DrawForm item="@selectedItem" type="ObjectType.Items" AddAndEditItem="UpdateItemAsync" options="@Options.Edit" />
+
+</MudDrawer>
+
+@code {
+
+    [Parameter] public string Id { get; set; }
+    IEnumerable<Item>? items { get; set; }
+    bool newDrawer;
+    bool settingsDrawer;
+    bool editDrawer;
+    private ShopCart _shopCart = new();
+    MudChip[] selected;
+    private Item selectedItem = new();
+    void OpenDrawer(Options options)
+    {
+        if (options == Options.Edit)
+        {
+            settingsDrawer = false;
+            newDrawer = false;
+            editDrawer = true;
+
+        }
+        else if (options == Options.New)
+        {
+            settingsDrawer = false;
+            editDrawer = false;
+            newDrawer = true;
+
+
+        }
+        else if (options == Options.Setting)
+        {
+            editDrawer = false;
+            newDrawer = false;
+            settingsDrawer = true;
+
+        }
+
+    }
+    protected async override Task OnInitializedAsync()
+    {
+        App.Current.On<Microsoft.Maui.Controls.PlatformConfiguration.Android>().UseWindowSoftInputModeAdjust(WindowSoftInputModeAdjust.Resize);
+
+        await LoadItemsAsync();
+    }
+    private async Task DeleteItemasync(Item item)
+    {
+        _shopCart.Items.Remove(item);
+        await ShopCart.UpdateAsync(_shopCart);
+        settingsDrawer = false;
+        await LoadItemsAsync();
+    }
+
+    private async Task UpdateItemAsync(Item item)
+    {
+        var itemToUpdate = _shopCart.Items.FirstOrDefault(i => i.Id == item.Id);
+        if (itemToUpdate != null)
+        {
+            itemToUpdate.ItemName = item.ItemName;
+
+            await ShopCart.UpdateAsync(_shopCart);
+        }
+        settingsDrawer = false;
+        await LoadItemsAsync();
+
+    }
+    private async Task LoadItemsAsync()
+    {
+        try
+        {
+
+            _shopCart = await ShopCart.GetByIdAsync(Convert.ToInt32(Id));
+            items = _shopCart.Items.ToList();
+            // if (!allrecipes.Any())
+            // {
+            //     Message = "No recipe on the list yet";
+
+            // }
+
+            StateHasChanged();
+
+        }
+        catch (Exception ex)
+        {
+            // Message = ex.Message;
+            // hasError = true;
+            // StateHasChanged();
+        }
+    }
+    private async Task AddNewItem(Item item)
+    {
+        if (item != null)
+        {
+            _shopCart.Items.Add(item);
+            await ShopCart.UpdateAsync(_shopCart);
+            newDrawer = false;
+            await LoadItemsAsync();
+        }
+    }
+}

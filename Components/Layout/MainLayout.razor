@@ -1,0 +1,44 @@
+﻿@inherits LayoutComponentBase
+@inject NavigationManager nav
+
+<MudThemeProvider />
+<MudDialogProvider />
+<MudSnackbarProvider />
+
+<MudLayout>
+
+      
+    <MudMainContent Class="mb-15"> 
+        @Body
+    </MudMainContent>
+@* 
+    <MudElement Class="tabs-container " >
+        <MudTabs MaxHeight="3" Elevation="4" Rounded="true" Centered="true" Color="@Color.Dark">
+            <MudTabPanel  Class="pl-9" Text="Recipe" Icon="@Icons.Outlined.FoodBank" BadgeColor="Color.Secondary" OnClick="NaviToRecipe" />
+            <MudTabPanel Class="n1" Text="List" Icon="@Icons.Outlined.FormatListBulleted" OnClick="NaviToList"/>
+            <MudTabPanel Class="pr-9" Text="Shop" Icon="@Icons.Outlined.ShoppingCart" OnClick="NaviToShop"/>
+        </MudTabs>
+    </MudElement> *@
+
+    <MudTabs Class="tabs-container" MaxHeight="3" Elevation="4" Rounded="true" Centered="true" Color="@Color.Transparent">
+            <MudTabPanel Class="pl-9" Text="Recipe" Icon="@Icons.Outlined.FoodBank" BadgeColor="Color.Secondary" OnClick="NaviToRecipe" />
+            <MudTabPanel Class="n1" Text="List" Icon="@Icons.Outlined.FormatListBulleted" OnClick="NaviToList" />
+            <MudTabPanel Class="pr-9" Text="Shop" Icon="@Icons.Outlined.ShoppingCart" OnClick="NaviToShop" />
+        </MudTabs>
+   
+
+</MudLayout>
+@code {
+    private void NaviToRecipe()
+    {
+        nav.NavigateTo("/");
+    }
+    private void NaviToList()
+    {
+        nav.NavigateTo("/counter");
+    }
+    private void NaviToShop()
+    {
+        nav.NavigateTo("/weather");
+    }
+}

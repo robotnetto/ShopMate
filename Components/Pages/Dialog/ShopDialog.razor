@@ -1,0 +1,32 @@
+﻿@* @inject IDialogService DialogService
+ *@
+
+<EditForm Model="recipeModel" OnValidSubmit="Submit">
+
+    <MudDialog>
+        <DialogContent>
+            <MudTextField T="string" @bind-Value="@(Recipe!.Title)" Label="Name"></MudTextField>
+        </DialogContent>
+        <DialogActions>
+            <MudButton OnClick="Cancel">Cancel</MudButton>
+            <MudButton Color="Color.Primary" ButtonType="ButtonType.Submit">Ok</MudButton>
+        </DialogActions>
+    </MudDialog>
+</EditForm>
+@code {
+    private Recipe recipeModel = new();
+    [CascadingParameter] MudDialogInstance MudDialog { get; set; }
+    [Parameter] public Recipe? Recipe { get; set; } 
+    [Parameter] public EventCallback<Recipe> UpdateRecipe { get; set; }
+
+
+    private async Task Submit()
+    {
+        if (Recipe!.Id != 0)
+
+
+        MudDialog.Close(DialogResult.Ok(true));
+    }
+
+    void Cancel() => MudDialog.Cancel();
+}

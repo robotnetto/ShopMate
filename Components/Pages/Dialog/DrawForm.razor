@@ -1,0 +1,118 @@
+﻿@if (type == ObjectType.Recipe)
+{
+    <EditForm Model="Recipe" OnValidSubmit="AddAndEditRecipeAsync">
+        <MudElement Class="d-flex flex-column flex-grow-1 ma-4">
+            <MudDrawerHeader Class="pl-1">
+                <MudText Typo="Typo.h6">@options</MudText>
+            </MudDrawerHeader>
+            <MudTextField @bind-Value="Recipe!.Title" Label="Recipe Title" Variant="Variant.Outlined" Class="mb-3" />
+            <MudFab Disabled="!hasValue" EndIcon="@Icons.Material.Filled.Save" ButtonType="ButtonType.Submit" Label="Save" Color="Color.Primary" />
+        </MudElement>
+    </EditForm>
+}
+else if (type == ObjectType.ShopList)
+{
+    <EditForm Model="ShopCart" OnValidSubmit="AddAndEditShopListAsync">
+        <MudElement Class="d-flex flex-column flex-grow-1 ma-4">
+            <MudDrawerHeader Class="pl-1">
+                <MudText Typo="Typo.h6">@options</MudText>
+            </MudDrawerHeader>
+            <MudTextField @bind-Value="ShopCart!.Title" Label="Cart Title" Variant="Variant.Outlined" Class="mb-3" />
+            <MudFab Disabled="!hasValue" EndIcon="@Icons.Material.Filled.Save" ButtonType="ButtonType.Submit" Label="Save" Color="Color.Primary" />
+        </MudElement>
+    </EditForm>
+}
+else if (type == ObjectType.Items)
+{
+
+    <EditForm Model="item" OnValidSubmit="AddAndEditItemListAync">
+        <MudElement Class="d-flex flex-column flex-grow-1 ma-4">
+            <MudDrawerHeader Class="pl-1">
+                <MudText Typo="Typo.h6">@options</MudText>
+            </MudDrawerHeader>
+            <MudTextField @bind-Value="item!.ItemName" Label="Item" Variant="Variant.Outlined" Class="mb-3" />
+            <MudFab Disabled="!hasValue" EndIcon="@Icons.Material.Filled.Save" ButtonType="ButtonType.Submit" Label="Save" Color="Color.Primary" />
+        </MudElement>
+    </EditForm>
+}
+
+
+@code {
+    [Parameter] public Item? item { get; set; } = new();
+    [Parameter] public Options? options { get; set; }
+    [Parameter] public ObjectType? type { get; set; }
+    [Parameter] public Recipe? Recipe { get; set; } = new();
+    [Parameter] public ShopCart? ShopCart { get; set; } = new();
+    bool hasValue => !string.IsNullOrEmpty(Recipe!.Title) || !string.IsNullOrEmpty(ShopCart!.Title) || !string.IsNullOrEmpty(item!.ItemName);
+    [Parameter] public EventCallback<Recipe> AddAndEditRecipe { get; set; }
+    [Parameter] public EventCallback<ShopCart> AddAndEditShopCart { get; set; }
+    [Parameter] public EventCallback<Item> AddAndEditItem { get; set; }
+
+    // protected override void OnInitialized()
+    // {
+    //     if (Recipe == null)
+    //     {
+    //         Recipe = new Recipe();
+    //     }
+    //     if (ShopCart == null)
+    //     {
+    //         ShopCart = new ShopCart();
+    //     }
+    // }
+
+    private async Task AddAndEditRecipeAsync()
+    {
+        var newRecipe = new Recipe();
+        if (Recipe != null)
+        {
+            if (options == Options.Edit)
+            {
+
+                await AddAndEditRecipe.InvokeAsync(Recipe);
+            }
+            else
+            {
+                newRecipe.Title = Recipe.Title;
+                await AddAndEditRecipe.InvokeAsync(newRecipe);
+                Recipe.Title = string.Empty;
+            }
+        }
+
+    }
+    private async Task AddAndEditShopListAsync()
+    {
+        var newShopCart = new ShopCart();
+        if (ShopCart != null)
+        {
+            if (options == Options.Edit)
+            {
+                await AddAndEditShopCart.InvokeAsync(ShopCart);
+            }
+            else
+            {
+                newShopCart.Title = ShopCart.Title;
+                await AddAndEditShopCart.InvokeAsync(newShopCart);
+                ShopCart.Title = string.Empty;
+            }
+
+        }
+    }
+    private async Task AddAndEditItemListAync()
+    {
+        var newItem = new Item();
+        if (item != null)
+        {
+
+            if (options == Options.Edit)
+            {
+                await AddAndEditItem.InvokeAsync(item);
+            }
+            else
+            {
+                newItem.ItemName = item.ItemName;
+                await AddAndEditItem.InvokeAsync(newItem);
+                item.ItemName = string.Empty;
+            }
+        }
+    }
+}
