@@ -1,6 +1,6 @@
 ﻿@inherits LayoutComponentBase
 @inject NavigationManager nav
-
+@inject IJSRuntime JS
 <MudThemeProvider />
 <MudDialogProvider />
 <MudSnackbarProvider />
@@ -29,16 +29,21 @@
 
 </MudLayout>
 @code {
+   
+
     private void NaviToRecipe()
     {
         nav.NavigateTo("/");
     }
-    private void NaviToList()
+    private async void NaviToList()
     {
+        // await JS.InvokeVoidAsync("addClass", "slide-out");
+        // await Task.Delay(500); // Wait for animation to complete
         nav.NavigateTo("/counter");
     }
     private void NaviToShop()
     {
         nav.NavigateTo("/weather");
     }
+  
 }

@@ -88,7 +88,7 @@ h1:focus {
 }
 
 .ship-container {
-    background-color: #ECEFF1 !important;
+    background-color:  whitesmoke !important;
 }
 
 .shop-icon-big {
@@ -102,6 +102,50 @@ h1:focus {
 .shop-icon-small {
     font-size: 2rem !important;
 }
+
+.progress-container {
+    background-color: white;
+    padding: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+}
+
+
+@keyframes slideIn {
+    from {
+        transform: translateX(100%);
+    }
+
+    to {
+        transform: translateX(0);
+    }
+}
+
+@keyframes slideOut {
+    from {
+        transform: translateX(0);
+    }
+
+    to {
+        transform: translateX(-100%);
+    }
+}
+
+.page {
+    animation-duration: 0.5s;
+    animation-fill-mode: both;
+}
+
+.slide-in {
+    animation: slideIn;
+}
+
+.slide-out {
+    animation: slideOut;
+}
+
+
+
 
 @supports (-webkit-touch-callout: none) {
     .status-bar-safe-area {

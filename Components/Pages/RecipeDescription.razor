@@ -1,7 +1,7 @@
 ﻿@inject IRecipe Recipe
 @page "/description/{Id}"
 @inject NavigationManager nav
-
+@inject IJSRuntime JS
 <MudAppBar Color="Color.Inherit">
     <MudIcon Icon="@Icons.Material.Outlined.RamenDining" Color="Color.Inherit" />
     <MudText Class="ml-2" Typo="Typo.h6" Color="Color.Inherit">@_recipe.Title</MudText>

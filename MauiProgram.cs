@@ -27,6 +27,7 @@ namespace ShopMate
             builder.Services.AddDbContext<LocalDbService>();
             builder.Services.AddSingleton<IRecipe, RecipeRepository>();
             builder.Services.AddSingleton<IShopCart, ShopCartRepository>();
+
             //builder.Services.AddSingleton<IFileService, FileService>();
             builder.Services.AddMudServices();
            

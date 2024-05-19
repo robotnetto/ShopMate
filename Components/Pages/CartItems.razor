@@ -9,40 +9,36 @@
     <MudButton Variant="Variant.Text" DisableRipple="false" EndIcon="@Icons.Material.Filled.Add" Color="Color.Inherit" OnClick="@(()=> OpenDrawer(Options.New))">Add</MudButton>
 
 </MudAppBar>
-@* @foreach (var item in items!)
-{
-    <MudStack AlignItems="AlignItems.Center" Class="mt-5">
-        <MudCard Style="width: 90%;" Elevation="3" Class="card-container ">
 
-            <MudCardHeader>
-                <CardHeaderContent>
-                    <MudButton Variant="Variant.Text" Color="Color.Inherit">@item.ItemName</MudButton>
-                </CardHeaderContent>
-
-            </MudCardHeader>
-
-        </MudCard>
-    </MudStack>
-
-} *@
 
 @if (items!.Any())
 {
-    <MudStack AlignItems="AlignItems.Center" Class="mt-5">
-        <MudPaper Style="width: 90%;" Elevation="3" Class="card-container ">
+    <MudElement Class=" progress-container  d-flex justify-content-center" style="position: fixed; top: 55px; left: 50%; transform: translate(-50%, 0); width: 105%; z-index: 1000; ">
+        <MudProgressLinear Color="Color.Success"
+                           Rounded="true"
+                           Size="Size.Medium"
+                           Value="items.Where(i => i.Active).Count()"
+                           Max="items.Count()"
+                           Style="width: 98%;" />
+    </MudElement>
 
-            <MudChipSet Class="d-flex flex-column" @bind-SelectedChips="selected" MultiSelection="true" Filter="true">
-                @foreach (var item in items!)
-                {
-                    <MudElement Class="d-flex flex-row justify-content-between">
-                        <MudChip Text="@item.ItemName"></MudChip>
-                        <MudIconButton Icon="@Icons.Material.Filled.MoreVert" Color="Color.Default" OnClick="@(()=>{ selectedItem = item; OpenDrawer(Options.Setting);})" />
-                    </MudElement>
-                    <MudDivider Class="my-1" />
-                }
-            </MudChipSet>
 
-        </MudPaper>
+    <MudStack AlignItems="AlignItems.Center" Class="mt-9">
+        @*  <MudPaper Style="width: 90%;" Elevation="1" Class="ship-container  ">
+    </MudPaper> *@
+
+        <MudChipSet Class="d-flex flex-column" Style="width: 85%;" MultiSelection="true" Filter="true">
+            @foreach (var item in items!)
+            {
+                <MudElement Class="d-flex flex-row justify-content-between ">
+                    <MudChip Class="mt-2 ml-3" @bind-Selected="item.Active" Default="item.Active" OnClick=" ()=>CheckList(item)" Variant="Variant.Text" Color="Color.Info" SelectedColor="Color.Success" Text="@item.ItemName"></MudChip>
+
+                    <MudIconButton Icon="@Icons.Material.Filled.MoreVert" Color="Color.Default" OnClick="@(()=>{ selectedItem = item; OpenDrawer(Options.Setting);})" />
+                </MudElement>
+                <hr style="margin:0;" />
+            }
+        </MudChipSet>
+
     </MudStack>
 
 }
@@ -78,8 +74,7 @@
 </MudDrawer>
 
 @code {
-
-    [Parameter] public string Id { get; set; }
+    [Parameter] public string Id { get; set; } = string.Empty;
     IEnumerable<Item>? items { get; set; }
     bool newDrawer;
     bool settingsDrawer;
@@ -113,10 +108,24 @@
         }
 
     }
+
     protected async override Task OnInitializedAsync()
     {
         App.Current.On<Microsoft.Maui.Controls.PlatformConfiguration.Android>().UseWindowSoftInputModeAdjust(WindowSoftInputModeAdjust.Resize);
 
+        await LoadItemsAsync();
+    }
+    private async Task CheckList(Item item)
+    {
+
+        var itemToUpdate = _shopCart.Items.FirstOrDefault(i => i.Id == item.Id);
+        if (itemToUpdate != null)
+        {
+            itemToUpdate.Active = !item.Active;
+
+            await ShopCart.UpdateAsync(_shopCart);
+        }
+        settingsDrawer = false;
         await LoadItemsAsync();
     }
     private async Task DeleteItemasync(Item item)

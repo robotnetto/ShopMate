@@ -1,5 +1,6 @@
 ﻿@page "/counter"
 @inject IShopCart ShopCart
+@inject IJSRuntime JS
 
 <MudAppBar Color="Color.Inherit">
     <MudIcon Icon="@Icons.Material.Filled.PlaylistAddCheck" Color="Color.Inherit" />
@@ -109,7 +110,13 @@ else
 
         await LoadShopListAsync();
     }
-
+    // protected override async Task OnAfterRenderAsync(bool firstRender)
+    // {
+    //     if (firstRender)
+    //     {
+    //         await JS.InvokeVoidAsync("addClass", "slide-in");
+    //     }
+    // }
     private async Task AddNewShopList(ShopCart shopCart)
     {
         if (shopCart != null)
