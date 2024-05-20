@@ -1,49 +1,36 @@
 ﻿@inherits LayoutComponentBase
 @inject NavigationManager nav
 @inject IJSRuntime JS
+
 <MudThemeProvider />
 <MudDialogProvider />
 <MudSnackbarProvider />
 
 <MudLayout>
 
-      
-    <MudMainContent Class="mb-15"> 
+    <MudMainContent Class="mb-15 page">
         @Body
     </MudMainContent>
-@* 
-    <MudElement Class="tabs-container " >
-        <MudTabs MaxHeight="3" Elevation="4" Rounded="true" Centered="true" Color="@Color.Dark">
-            <MudTabPanel  Class="pl-9" Text="Recipe" Icon="@Icons.Outlined.FoodBank" BadgeColor="Color.Secondary" OnClick="NaviToRecipe" />
-            <MudTabPanel Class="n1" Text="List" Icon="@Icons.Outlined.FormatListBulleted" OnClick="NaviToList"/>
-            <MudTabPanel Class="pr-9" Text="Shop" Icon="@Icons.Outlined.ShoppingCart" OnClick="NaviToShop"/>
-        </MudTabs>
-    </MudElement> *@
 
     <MudTabs Class="tabs-container" MaxHeight="3" Elevation="4" Rounded="true" Centered="true" Color="@Color.Transparent">
-            <MudTabPanel Class="pl-9" Text="Recipe" Icon="@Icons.Outlined.FoodBank" BadgeColor="Color.Secondary" OnClick="NaviToRecipe" />
-            <MudTabPanel Class="n1" Text="List" Icon="@Icons.Outlined.FormatListBulleted" OnClick="NaviToList" />
-            <MudTabPanel Class="pr-9" Text="Shop" Icon="@Icons.Outlined.ShoppingCart" OnClick="NaviToShop" />
-        </MudTabs>
-   
+        <MudTabPanel Class="pl-9" Text="Recipe" Icon="@Icons.Outlined.FoodBank" BadgeColor="Color.Secondary" OnClick="@(async () => await NavigateWithAnimation("/"))" />
+        <MudTabPanel Class="n1" Text="List" Icon="@Icons.Outlined.FormatListBulleted" BadgeColor="Color.Secondary" OnClick="@(async () => await  NavigateWithAnimation("/counter"))" />
+        <MudTabPanel Class="pr-9" Text="Shop" Icon="@Icons.Outlined.ShoppingCart" BadgeColor="Color.Secondary" OnClick="@(async () => await NavigateWithAnimation("/weather"))" />
+    </MudTabs>
 
 </MudLayout>
-@code {
-   
 
-    private void NaviToRecipe()
+@code {
+    private async Task NavigateWithAnimation(string url)
     {
-        nav.NavigateTo("/");
+        await JS.InvokeVoidAsync("navigateWithAnimation", url);
     }
-    private async void NaviToList()
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        // await JS.InvokeVoidAsync("addClass", "slide-out");
-        // await Task.Delay(500); // Wait for animation to complete
-        nav.NavigateTo("/counter");
+        if (firstRender)
+        {
+            await JS.InvokeVoidAsync("initializeSwipeEvents");
+        }
     }
-    private void NaviToShop()
-    {
-        nav.NavigateTo("/weather");
-    }
-  
 }

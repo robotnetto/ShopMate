@@ -110,6 +110,13 @@ else
 
         await LoadShopListAsync();
     }
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await JS.InvokeVoidAsync("initializeSwipeEvents");
+        }
+    }
     // protected override async Task OnAfterRenderAsync(bool firstRender)
     // {
     //     if (firstRender)

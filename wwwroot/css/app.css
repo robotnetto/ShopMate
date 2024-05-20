@@ -110,8 +110,17 @@ h1:focus {
     border-radius: 8px;
 }
 
+@keyframes slideOutToRight {
+    from {
+        transform: translateX(0);
+    }
 
-@keyframes slideIn {
+    to {
+        transform: translateX(100%);
+    }
+}
+
+@keyframes slideInFromRight {
     from {
         transform: translateX(100%);
     }
@@ -121,30 +130,54 @@ h1:focus {
     }
 }
 
-@keyframes slideOut {
-    from {
-        transform: translateX(0);
-    }
-
-    to {
-        transform: translateX(-100%);
-    }
-}
-
 .page {
     animation-duration: 0.5s;
     animation-fill-mode: both;
 }
 
-.slide-in {
-    animation: slideIn;
+.slide-out-right {
+    animation-name: slideOutToRight;
 }
 
-.slide-out {
-    animation: slideOut;
+.slide-in-right {
+    animation-name: slideInFromRight;
 }
 
 
+
+.search-container {
+    display: flex;
+    margin-bottom: 1em;
+}
+
+    .search-container input {
+        flex: 1;
+        padding: 0.5em;
+        font-size: 1em;
+    }
+
+    .search-container button {
+        padding: 0.5em;
+        font-size: 1em;
+        cursor: pointer;
+    }
+
+.results-list {
+    list-style-type: none;
+    padding: 0;
+}
+
+    .results-list li {
+        padding: 1em;
+        border: 1px solid #ccc;
+        margin-bottom: 0.5em;
+        cursor: pointer;
+        transition: background-color 0.3s;
+    }
+
+        .results-list li:hover {
+            background-color: #f0f0f0;
+        }
 
 
 @supports (-webkit-touch-callout: none) {

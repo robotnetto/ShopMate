@@ -6,6 +6,8 @@ using MudBlazor.Services;
 using ShopMate.Data;
 using ShopMate.Service;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
+
 
 namespace ShopMate
 {
@@ -21,6 +23,7 @@ namespace ShopMate
                 {
                     fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");
                 }
+                
                 );
 
             builder.Services.AddMauiBlazorWebView();
@@ -28,9 +31,10 @@ namespace ShopMate
             builder.Services.AddSingleton<IRecipe, RecipeRepository>();
             builder.Services.AddSingleton<IShopCart, ShopCartRepository>();
 
-            //builder.Services.AddSingleton<IFileService, FileService>();
             builder.Services.AddMudServices();
-           
+            builder.Services.AddHttpClient();
+
+
             var dbContext = new LocalDbService();
             //dbContext.Database.EnsureDeleted();
             dbContext.Database.EnsureCreated();
@@ -38,7 +42,7 @@ namespace ShopMate
 
 #if DEBUG
             builder.Services.AddBlazorWebViewDeveloperTools();
-    		builder.Logging.AddDebug();
+            builder.Logging.AddDebug();
 #endif
 
             return builder.Build();

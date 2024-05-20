@@ -1,61 +1,151 @@
 ﻿@page "/weather"
+@using System.Text.Json
+@inject NavigationManager Navigation
+@inject HttpClient HttpClient
+@inject IJSRuntime JSRuntime
+<MudAppBar Color="Color.Inherit">
+    <MudIcon Icon="@Icons.Material.Filled.MyLocation" Color="Color.Inherit" />
+    <MudText Class="ml-2" Typo="Typo.h6" Color="Color.Inherit">Store</MudText>
+    <MudSpacer />
 
-<h1>Weather</h1>
+</MudAppBar>
 
-<p>This component demonstrates showing data.</p>
 
-@if (forecasts == null)
+<h3> Location Search</h3>
+<div class="search-container" style="position: fixed; top: 57px; left: 50%; transform: translate(-50%, 0); width: 100%; z-index: 1000; ">
+    <input type="text" @bind="searchQuery" placeholder="Search for store" />
+    <button @onclick="OnSearch">Search</button>
+</div>
+
+@if (locations.Any())
 {
-    <p><em>Loading...</em></p>
-}
-else
-{
-    <table class="table">
-        <thead>
-            <tr>
-                <th>Date</th>
-                <th>Temp. (C)</th>
-                <th>Temp. (F)</th>
-                <th>Summary</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var forecast in forecasts)
-            {
-                <tr>
-                    <td>@forecast.Date.ToShortDateString()</td>
-                    <td>@forecast.TemperatureC</td>
-                    <td>@forecast.TemperatureF</td>
-                    <td>@forecast.Summary</td>
-                </tr>
-            }
-        </tbody>
-    </table>
+    <ul class="results-list">
+        @foreach (var location in locations)
+        {
+            <li @onclick="() => OnLocationSelected(location)">
+                <strong>@location.Name</strong>
+                <p>@location.Address</p>
+                <p>Distance: @location.Distance.ToString("F1") km</p>
+            </li>
+        }
+    </ul>
 }
 
 @code {
-    private WeatherForecast[]? forecasts;
+    private string searchQuery;
+    private List<LocationData> locations = new();
+    private const string GoogleApiKey = "AIzaSyC1hsMxPaqO70V1QQzkvtuCd_lZUIDxRI0"; // Replace with your actual Google API key
 
-    protected override async Task OnInitializedAsync()
+    private async Task OnSearch()
     {
-        // Simulate asynchronous loading to demonstrate a loading indicator
-        await Task.Delay(500);
-
-        var startDate = DateOnly.FromDateTime(DateTime.Now);
-        var summaries = new[] { "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching" };
-        forecasts = Enumerable.Range(1, 5).Select(index => new WeatherForecast
+        try
         {
-            Date = startDate.AddDays(index),
-            TemperatureC = Random.Shared.Next(-20, 55),
-            Summary = summaries[Random.Shared.Next(summaries.Length)]
-        }).ToArray();
+            var location = await Geolocation.GetLocationAsync();
+            if (location != null)
+            {
+                await FetchLocationsAsync(location.Latitude, location.Longitude, searchQuery, 20);
+            }
+            else
+            {
+                await JSRuntime.InvokeVoidAsync("alert", "Unable to get current location.");
+            }
+        }
+        catch (Exception ex)
+        {
+            await JSRuntime.InvokeVoidAsync("alert", $"Error: {ex.Message}");
+        }
     }
 
-    private class WeatherForecast
+    private async Task FetchLocationsAsync(double latitude, double longitude, string query, double radiusKm)
     {
-        public DateOnly Date { get; set; }
-        public int TemperatureC { get; set; }
-        public string? Summary { get; set; }
-        public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
+        var url = $"https://maps.googleapis.com/maps/api/place/nearbysearch/json?location={latitude},{longitude}&radius={radiusKm * 1000}&keyword={query}&key={GoogleApiKey}";
+
+        try
+        {
+            var response = await HttpClient.GetFromJsonAsync<GooglePlacesResponse>(url);
+
+            // Log the response for debugging purposes
+            Console.WriteLine(JsonSerializer.Serialize(response));
+
+            if (response?.Results != null)
+            {
+                locations = response.Results
+                    .Where(r => r.Geometry?.Location != null && r.Name.Contains(query, StringComparison.OrdinalIgnoreCase)) // Ensure PlaceGeometry and Coordinates are not null
+                    .Select(r => new LocationData
+                        {
+                            Name = r.Name,
+                            Address = r.Vicinity,
+                            Latitude = r.Geometry?.Location?.Lat ?? 0, // Use null-coalescing operator
+                            Longitude = r.Geometry?.Location?.Lng ?? 0, // Use null-coalescing operator
+                            Distance = CalculateDistance(latitude, longitude, r.Geometry.Location.Lat, r.Geometry.Location.Lng)
+                        })
+                    .OrderBy(l => l.Distance).ThenBy(n => n.Name) // Sort by distance
+                    .ToList();
+            }
+            else
+            {
+                locations.Clear();
+            }
+        }
+        catch (Exception ex)
+        {
+            await JSRuntime.InvokeVoidAsync("alert", $"Error fetching locations: {ex.Message}");
+        }
     }
+
+    private void OnLocationSelected(LocationData location)
+    {
+        var uri = $"https://www.google.com/maps/search/?api=1&query={location.Name},{location.Address}";
+        Navigation.NavigateTo(uri, true);
+    }
+
+    private double CalculateDistance(double lat1, double lon1, double lat2, double lon2)
+    {
+        const double R = 6371; // Radius of the earth in km
+        var latDistance = DegreesToRadians(lat2 - lat1);
+        var lonDistance = DegreesToRadians(lon2 - lon1);
+        var a =
+            Math.Sin(latDistance / 2) * Math.Sin(latDistance / 2) +
+            Math.Cos(DegreesToRadians(lat1)) * Math.Cos(DegreesToRadians(lat2)) *
+            Math.Sin(lonDistance / 2) * Math.Sin(lonDistance / 2);
+        var c = 2 * Math.Atan2(Math.Sqrt(a), Math.Sqrt(1 - a));
+        var distance = R * c; // Distance in km
+        return distance;
+    }
+
+    private double DegreesToRadians(double degrees)
+    {
+        return degrees * (Math.PI / 180);
+    }
+    public class LocationData
+    {
+        public string Name { get; set; }
+        public string Address { get; set; }
+        public double Latitude { get; set; }
+        public double Longitude { get; set; }
+        public double Distance { get; set; } // Distance in kilometers
+    }
+    public class GooglePlacesResponse
+    {
+        public List<PlaceResult> Results { get; set; }
+
+        public class PlaceResult
+        {
+            public string Name { get; set; }
+            public string Vicinity { get; set; }
+            public PlaceGeometry Geometry { get; set; }
+
+            public class PlaceGeometry
+            {
+                public Coordinates Location { get; set; }
+
+                public class Coordinates
+                {
+                    public double Lat { get; set; }
+                    public double Lng { get; set; }
+                }
+            }
+        }
+    }
+
 }

@@ -2,7 +2,7 @@
 @inject IDialogService DialogService
 @inject IRecipe Recipe
 @inject NavigationManager nav
-
+@inject IJSRuntime JS
 
 @* -----Topbar---- *@
 <MudAppBar Color="Color.Inherit">
@@ -134,6 +134,13 @@ else
     {
         App.Current.On<Microsoft.Maui.Controls.PlatformConfiguration.Android>().UseWindowSoftInputModeAdjust(WindowSoftInputModeAdjust.Resize);
         await LoadRecipesAsync();
+    }
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await JS.InvokeVoidAsync("initializeSwipeEvents");
+        }
     }
 
     private async Task HandleFavoriteChange(Recipe recipe)
