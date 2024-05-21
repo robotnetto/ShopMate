@@ -17,7 +17,9 @@
 @* ----Content---- *@
 @if (allrecipes == null || !allrecipes.Any() || hasError)
 {
-    <MudElement Class="d-flex justify-content-center mt-7">
+   
+    <MudElement Class="loading-indicator">
+        <MudIcon Class="shop-icon-big" Icon="@ShopIcon.Recipe" />
         <MudText>@Message</MudText>
     </MudElement>
 }
@@ -150,7 +152,7 @@ else
             allrecipes = await Recipe.GetAllAsync();
             if (!allrecipes.Any())
             {
-                Message = "No recipe on the list yet";
+                Message = "Add new recipe";
 
             }
 

@@ -13,7 +13,8 @@
 @* ----Content---- *@
 @if (ShopListCart == null || !ShopListCart.Any() || hasError)
 {
-    <MudElement Class="d-flex justify-content-center mt-7">
+    <MudElement Class="loading-indicator">
+        <MudIcon Class="shop-icon-big" Icon="@ShopIcon.Cart" />
         <MudText>@Message</MudText>
     </MudElement>
 }
@@ -56,7 +57,7 @@ else
 @* ----Add---- *@
 <MudDrawer @bind-Open="@newDrawer" Anchor="Anchor.Bottom" Elevation="3" Variant="@DrawerVariant.Temporary" Color="Color.Inherit">
 
-    <DrawForm type="ObjectType.ShopList" options="Options.New" AddAndEditShopCart="AddNewShopList" />
+    <DrawForm type="ObjectType.CartList" options="Options.New" AddAndEditShopCart="AddNewShopList" />
 
 </MudDrawer>
 
@@ -64,7 +65,8 @@ else
 
 <MudDrawer @bind-Open="@editDrawer" Anchor="Anchor.Bottom" Elevation="3" Variant="@DrawerVariant.Temporary" Color="Color.Inherit">
 
-    <DrawForm ShopCart="@selectedShopCart" type="ObjectType.ShopList" AddAndEditShopCart="UpdateCartAsync" options="@Options.Edit" />
+    <DrawForm ShopCart="@selectedShopCart" type="ObjectType.CartList" AddAndEditShopCart="UpdateCartAsync" options="@Options.Edit" />
+
 
 </MudDrawer>
 
@@ -138,7 +140,7 @@ else
             ShopListCart = await ShopCart.GetAllasync();
             if (!ShopListCart.Any())
             {
-                Message = "List is empty!";
+                Message = "Add new cart";
 
             }
             StateHasChanged();

@@ -1,4 +1,4 @@
-﻿html, body {
+﻿﻿html, body {
     font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
 }
 
@@ -83,12 +83,32 @@ h1:focus {
     border-top: 1px solid #ccc; /* Lägg till en toppgräns för att separera flikarna från sidoinnehållet */
 }
 
+.search-bar {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    height: 40px; /* Adjust the height of the container */
+}
+
+.search-input .mud-input-input {
+    height: 24px; /* Adjust the height of the input field */
+    padding: 10px; /* Adjust padding to fit the new height */
+    font-size: 14px; /* Adjust font size if needed */
+}
+
+.search-button .mud-button-root {
+    height: 40px; /* Adjust the height of the button */
+    width: 40px; /* Ensure the button is square */
+    min-width: 40px; /* Ensure the button is square */
+    padding: 5px; /* Remove padding to fit the height */
+}
+
 .card-container {
     background-color: #ECEFF1 !important;
 }
 
 .ship-container {
-    background-color: #ECEFF1 !important;
+    background-color: whitesmoke !important;
 }
 
 .shop-icon-big {
@@ -102,6 +122,57 @@ h1:focus {
 .shop-icon-small {
     font-size: 2rem !important;
 }
+
+.progress-container {
+    background-color: white;
+    padding: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+}
+
+.loading-indicator {
+    display: flex;
+    flex-direction: column; /* Stack items vertically */
+    justify-content: center;
+    align-items: center;
+    height: 55vh; /* Adjust height as needed */
+}
+
+
+/* Define the slide-in-right animation */
+@keyframes slide-in-right {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+/* Apply the animation to elements with the slide-in class */
+.slide-in-right {
+    animation: slide-in-right 0.5s forwards;
+}
+
+
+.search-container {
+    padding-top: 75px; /* Adjust this value to be slightly more than the height of your search bar */
+}
+
+.results-list {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+}
+
+    .results-list li {
+        padding: 10px;
+        border-bottom: 1px solid #ccc;
+    }
+
 
 @supports (-webkit-touch-callout: none) {
     .status-bar-safe-area {

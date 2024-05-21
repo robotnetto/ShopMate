@@ -23,7 +23,7 @@ namespace ShopMate.Data
     public enum ObjectType
     {
         Recipe,
-        ShopList,
+        CartList,
         Items
     }
 }
