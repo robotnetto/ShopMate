@@ -7,15 +7,28 @@
     <MudIcon Icon="@Icons.Material.Filled.MyLocation" Color="Color.Inherit" />
     <MudText Class="ml-2" Typo="Typo.h6" Color="Color.Inherit">Store</MudText>
     <MudSpacer />
+    
 
+   @*  <button @onclick="OnSearch">Search</button> *@
 </MudAppBar>
 
 
-<h3> Location Search</h3>
+@* <h3> Location Search</h3>
 <div class="search-container" style="position: fixed; top: 57px; left: 50%; transform: translate(-50%, 0); width: 100%; z-index: 1000; ">
     <input type="text" @bind="searchQuery" placeholder="Search for store" />
-    <button @onclick="OnSearch">Search</button>
-</div>
+    
+</div> *@
+@* <MudElement Class=" progress-container  d-flex justify-content-center" style="position: fixed; top: 55px; left: 50%; transform: translate(-50%, 0); width: 95%; z-index: 1000; ">
+    <MudTextField @bind-Value="searchQuery" Label="Search for store" Variant="Variant.Outlined" />
+    <MudIconButton Icon="@Icons.Material.Filled.Search" OnClick="OnSearch"></MudIconButton>
+
+</MudElement> *@
+<MudElement Class="progress-container d-flex justify-content-center" style="position: fixed; top: 55px; left: 50%; transform: translate(-50%, 0); width: 105%; z-index: 1000;">
+    <div class="search-bar d-flex align-items-center">
+        <MudTextField @bind-Value="searchQuery" Label="Search for store" Variant="Variant.Outlined" Class="search-input" />
+        <MudIconButton Icon="@Icons.Material.Filled.Search" OnClick="OnSearch" Class="search-button"></MudIconButton>
+    </div>
+</MudElement>
 
 @if (locations.Any())
 {

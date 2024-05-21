@@ -83,6 +83,26 @@ h1:focus {
     border-top: 1px solid #ccc; /* Lägg till en toppgräns för att separera flikarna från sidoinnehållet */
 }
 
+.search-bar {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    height: 40px; /* Adjust the height of the container */
+}
+
+.search-input .mud-input-input {
+    height: 24px; /* Adjust the height of the input field */
+    padding: 10px; /* Adjust padding to fit the new height */
+    font-size: 14px; /* Adjust font size if needed */
+}
+
+.search-button .mud-button-root {
+    height: 40px; /* Adjust the height of the button */
+    width: 40px; /* Ensure the button is square */
+    min-width: 40px; /* Ensure the button is square */
+    padding: 5px; /* Remove padding to fit the height */
+}
+
 .card-container {
     background-color: #ECEFF1 !important;
 }
@@ -110,38 +130,23 @@ h1:focus {
     border-radius: 8px;
 }
 
-@keyframes slideOutToRight {
-    from {
-        transform: translateX(0);
-    }
-
-    to {
-        transform: translateX(100%);
-    }
-}
-
-@keyframes slideInFromRight {
+/* Define the slide-in-right animation */
+@keyframes slide-in-right {
     from {
         transform: translateX(100%);
+        opacity: 0;
     }
 
     to {
         transform: translateX(0);
+        opacity: 1;
     }
 }
 
 .page {
-    animation-duration: 0.5s;
-    animation-fill-mode: both;
+    animation: slide-in-right 0.5s forwards;
 }
 
-.slide-out-right {
-    animation-name: slideOutToRight;
-}
-
-.slide-in-right {
-    animation-name: slideInFromRight;
-}
 
 
 

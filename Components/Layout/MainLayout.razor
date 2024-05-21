@@ -1,6 +1,5 @@
 ﻿@inherits LayoutComponentBase
 @inject NavigationManager nav
-@inject IJSRuntime JS
 
 <MudThemeProvider />
 <MudDialogProvider />
@@ -13,24 +12,17 @@
     </MudMainContent>
 
     <MudTabs Class="tabs-container" MaxHeight="3" Elevation="4" Rounded="true" Centered="true" Color="@Color.Transparent">
-        <MudTabPanel Class="pl-9" Text="Recipe" Icon="@Icons.Outlined.FoodBank" BadgeColor="Color.Secondary" OnClick="@(async () => await NavigateWithAnimation("/"))" />
-        <MudTabPanel Class="n1" Text="List" Icon="@Icons.Outlined.FormatListBulleted" BadgeColor="Color.Secondary" OnClick="@(async () => await  NavigateWithAnimation("/counter"))" />
-        <MudTabPanel Class="pr-9" Text="Shop" Icon="@Icons.Outlined.ShoppingCart" BadgeColor="Color.Secondary" OnClick="@(async () => await NavigateWithAnimation("/weather"))" />
+        <MudTabPanel Class="pl-9" Text="Recipe" Icon="@Icons.Outlined.FoodBank" BadgeColor="Color.Secondary" OnClick="@( () =>  NavigateWithAnimation("/"))" />
+        <MudTabPanel Class="n1" Text="List" Icon="@Icons.Outlined.FormatListBulleted" BadgeColor="Color.Secondary" OnClick="@( () =>   NavigateWithAnimation("/counter"))" />
+        <MudTabPanel Class="pr-9" Text="Shop" Icon="@Icons.Outlined.ShoppingCart" BadgeColor="Color.Secondary" OnClick="@( () =>  NavigateWithAnimation("/weather"))" />
     </MudTabs>
 
 </MudLayout>
 
 @code {
-    private async Task NavigateWithAnimation(string url)
+    private  void NavigateWithAnimation(string url)
     {
-        await JS.InvokeVoidAsync("navigateWithAnimation", url);
+         nav.NavigateTo(url);
     }
-
-    protected override async Task OnAfterRenderAsync(bool firstRender)
-    {
-        if (firstRender)
-        {
-            await JS.InvokeVoidAsync("initializeSwipeEvents");
-        }
-    }
+    
 }

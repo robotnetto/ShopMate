@@ -52,8 +52,7 @@
         <MudDrawerHeader Class="pl-1">
             <MudText Typo="Typo.h6">Settings</MudText>
         </MudDrawerHeader>
-        @*         <ShopDialog Recipe="@selectedRecipe" UpdateRecipe="UpdateRecipe" />
-        *@
+        
         <MudFab Class="mb-3" EndIcon="@Icons.Material.Filled.DriveFileRenameOutline" OnClick="@( ()=> OpenDrawer(Options.Edit))" Label="Edit name" Color="Color.Tertiary" />
 
         <MudFab EndIcon="@Icons.Material.Filled.Delete" OnClick="@(()=>DeleteItemasync(selectedItem))" Label="Delete" Color="Color.Error" />
@@ -80,7 +79,6 @@
     bool settingsDrawer;
     bool editDrawer;
     private ShopCart _shopCart = new();
-    MudChip[] selected;
     private Item selectedItem = new();
     void OpenDrawer(Options options)
     {

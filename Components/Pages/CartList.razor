@@ -110,19 +110,18 @@ else
 
         await LoadShopListAsync();
     }
-    protected override async Task OnAfterRenderAsync(bool firstRender)
-    {
-        if (firstRender)
-        {
-            await JS.InvokeVoidAsync("initializeSwipeEvents");
-        }
-    }
-    // protected override async Task OnAfterRenderAsync(bool firstRender)
+    // protected override async Task OnParametersSetAsync()
     // {
-    //     if (firstRender)
-    //     {
-    //         await JS.InvokeVoidAsync("addClass", "slide-in");
-    //     }
+    //     ResetDrawerStates();
+    // }
+
+    // private void ResetDrawerStates()
+    // {
+    //     // Set your drawer states to false
+
+    //     editDrawer = false;
+    //     newDrawer = false;
+    //     settingsDrawer = false;
     // }
     private async Task AddNewShopList(ShopCart shopCart)
     {
