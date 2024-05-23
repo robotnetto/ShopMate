@@ -1,32 +1,24 @@
-﻿@* @inject IDialogService DialogService
- *@
+﻿@inject NavigationManager nav
+<MudDialog>
+    <DialogContent  >
+        <MudElement Class="d-flex flex-column justify-content-center align-items-center pb-3
 
-<EditForm Model="recipeModel" OnValidSubmit="Submit">
+">
 
-    <MudDialog>
-        <DialogContent>
-            <MudTextField T="string" @bind-Value="@(Recipe!.Title)" Label="Name"></MudTextField>
-        </DialogContent>
-        <DialogActions>
-            <MudButton OnClick="Cancel">Cancel</MudButton>
-            <MudButton Color="Color.Primary" ButtonType="ButtonType.Submit">Ok</MudButton>
-        </DialogActions>
-    </MudDialog>
-</EditForm>
+            <MudIcon Class="shop-icon-medium" Icon="@ShopIcon.Thumb" @onclick="Submit" />
+            <MudText>You are done!</MudText>
+        </MudElement>
+    </DialogContent>
+
+</MudDialog>
+
 @code {
-    private Recipe recipeModel = new();
     [CascadingParameter] MudDialogInstance MudDialog { get; set; }
-    [Parameter] public Recipe? Recipe { get; set; } 
-    [Parameter] public EventCallback<Recipe> UpdateRecipe { get; set; }
 
-
-    private async Task Submit()
+    void Submit()
     {
-        if (Recipe!.Id != 0)
-
-
         MudDialog.Close(DialogResult.Ok(true));
+        nav.NavigateTo("/counter");
     }
-
     void Cancel() => MudDialog.Cancel();
 }

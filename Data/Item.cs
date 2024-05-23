@@ -19,7 +19,5 @@ namespace ShopMate.Data
 
         public bool Active { get; set; }
 
-        //[ForeignKey(nameof(ShopCart))] // Specify the type of the foreign key property
-        //public int ShopCartId { get; set; } // Foreign key property referencing ShopCart
     }
 }

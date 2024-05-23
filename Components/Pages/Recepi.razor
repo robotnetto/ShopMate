@@ -40,8 +40,9 @@ else
                 }
                 else
                 {
-
-                    <MudCardMedia Image="@item.ImageStream" Height="150" />
+                    <a href="@($"description/{item.Id}")">
+                        <MudCardMedia Image="@item.ImageStream" Height="150" />
+                    </a>
                 }
                 <MudCardContent Class="mt-n3 ">
                     <MudButton Variant="Variant.Text" Href="@($"description/{item.Id}")" Color="Color.Inherit">@item.Title</MudButton>
@@ -50,8 +51,7 @@ else
                 <MudCardActions Class="mt-n9 ">
                     <MudCheckBox Class="ml-3" @bind-Value="@item.Favorite" Color="Color.Secondary" @oninput="()=> HandleFavoriteChange(item)" CheckedIcon="@Icons.Material.Filled.Favorite" UncheckedIcon="@Icons.Material.Filled.FavoriteBorder"></MudCheckBox>
 
-@*                     <MudRating Class="ml-3" ReadOnly="true" SelectedValue="item.Rate" />
- *@                    <MudSpacer />
+              <MudSpacer />
 
                     <MudIconButton Icon="@Icons.Material.Filled.MoreVert" Color="Color.Default" OnClick="@(()=>{ selectedRecipe = item; OpenDrawer(Options.Setting);})" />
                 </MudCardActions>

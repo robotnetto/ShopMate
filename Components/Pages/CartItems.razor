@@ -1,5 +1,6 @@
 ﻿@page "/cartItems/{Id}"
 @inject IShopCart ShopCart
+@inject IDialogService DialogService
 
 <MudAppBar Color="Color.Inherit">
     <MudIcon Icon="@Icons.Material.Filled.AddShoppingCart" Color="Color.Inherit" />
@@ -20,8 +21,10 @@
                            Value="items.Where(i => i.Active).Count()"
                            Max="items.Count()"
                            Style="width: 98%;" />
+
     </MudElement>
 
+  
 
     <MudStack AlignItems="AlignItems.Center" Class="mt-9">
         @*  <MudPaper Style="width: 90%;" Elevation="1" Class="ship-container  ">
@@ -120,7 +123,14 @@ else if (!items!.Any())
         App.Current.On<Microsoft.Maui.Controls.PlatformConfiguration.Android>().UseWindowSoftInputModeAdjust(WindowSoftInputModeAdjust.Resize);
 
         await LoadItemsAsync();
+
     }
+    private void OpenDialog()
+    {
+        // var options = new DialogOptions { CloseOnEscapeKey = true };
+        DialogService.Show<ShopDialog>();
+    }
+
     private async Task CheckList(Item item)
     {
 
@@ -130,6 +140,10 @@ else if (!items!.Any())
             itemToUpdate.Active = !item.Active;
 
             await ShopCart.UpdateAsync(_shopCart);
+            if (items!.Any() && items!.Where(i => i.Active).Count() == items!.Count())
+        {
+                OpenDialog();
+            }
         }
         settingsDrawer = false;
         await LoadItemsAsync();

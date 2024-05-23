@@ -48,32 +48,41 @@
 
 @code {
     private string searchQuery;
-    private bool isLoading = false; 
+    private bool isLoading = false;
     private List<LocationData> locations = new();
     private const string GoogleApiKey = "AIzaSyC1hsMxPaqO70V1QQzkvtuCd_lZUIDxRI0";
 
     private async Task OnSearch()
     {
-        isLoading = true; 
-        try
+        if (string.IsNullOrWhiteSpace(searchQuery))
         {
-            var location = await Geolocation.GetLocationAsync();
-            if (location != null)
-            {
-                await FetchLocationsAsync(location.Latitude, location.Longitude, searchQuery, 20);
-            }
-            else
-            {
-                await JSRuntime.InvokeVoidAsync("alert", "Unable to get current location.");
-            }
+            locations.Clear();
+            StateHasChanged();
+            await JSRuntime.InvokeVoidAsync("alert", "Unable to search");
         }
-        catch (Exception ex)
+        else
         {
-            await JSRuntime.InvokeVoidAsync("alert", $"Error: {ex.Message}");
-        }
-        finally
-        {
-            isLoading = false; 
+            isLoading = true;
+            try
+            {
+                var location = await Geolocation.GetLocationAsync();
+                if (location != null)
+                {
+                    await FetchLocationsAsync(location.Latitude, location.Longitude, searchQuery, 20);
+                }
+                else
+                {
+                    await JSRuntime.InvokeVoidAsync("alert", "Unable to get current location.");
+                }
+            }
+            catch (Exception ex)
+            {
+                await JSRuntime.InvokeVoidAsync("alert", $"Error: {ex.Message}");
+            }
+            finally
+            {
+                isLoading = false;
+            }
         }
     }
 
@@ -91,13 +100,13 @@
                 locations = response.Results
                     .Where(r => r.Geometry?.Location != null && r.Name.Contains(query, StringComparison.OrdinalIgnoreCase))
                     .Select(r => new LocationData
-                    {
-                        Name = r.Name,
-                        Address = r.Vicinity,
-                        Latitude = r.Geometry?.Location?.Lat ?? 0, 
-                        Longitude = r.Geometry?.Location?.Lng ?? 0, 
-                        Distance = CalculateDistance(latitude, longitude, r.Geometry.Location.Lat, r.Geometry.Location.Lng)
-                    })
+                        {
+                            Name = r.Name,
+                            Address = r.Vicinity,
+                            Latitude = r.Geometry?.Location?.Lat ?? 0,
+                            Longitude = r.Geometry?.Location?.Lng ?? 0,
+                            Distance = CalculateDistance(latitude, longitude, r.Geometry.Location.Lat, r.Geometry.Location.Lng)
+                        })
                     .OrderBy(l => l.Distance).ThenBy(n => n.Name)
                     .ToList();
             }
