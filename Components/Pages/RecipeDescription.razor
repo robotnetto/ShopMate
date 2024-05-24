@@ -99,31 +99,7 @@
 
     private async Task ImageUpload()
     {
-        // var image = await MediaPicker.PickPhotoAsync(new MediaPickerOptions
-        //     {
-        //         Title = "Select a photo"
-        //     });
-        // if (image != null)
-        // {
-
-        //     try
-        //     {
-        //         var stream = await image.OpenReadAsync();
-
-        //         var fileName = $"selectedImage_{DateTime.Now.ToString("yyyyMMddHHmmss")}.jpg";
-
-        //         imagePath = await fileService.SaveImageAsync(stream , fileName);
-        //         bool fileExists = File.Exists(imagePath);
-
-
-        //         StateHasChanged();
-
-        //     }
-        //     catch (Exception ex)
-        //     {
-
-        //     }
-        // }
+        
         var image = await MediaPicker.PickPhotoAsync(new MediaPickerOptions
             {
                 Title = "Select a photo"
@@ -135,7 +111,7 @@
             {
                 var stream = await image.OpenReadAsync();
 
-                using var reader = new StreamReader(stream);
+                // using var reader = new StreamReader(stream);
 
                 byte[] result;
                 using (var streamReader = new MemoryStream())
