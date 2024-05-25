@@ -6,15 +6,15 @@
     <MudIcon Icon="@Icons.Material.Outlined.RamenDining" Color="Color.Inherit" />
     <MudText Class="ml-2" Typo="Typo.h6" Color="Color.Inherit">@_recipe.Title</MudText>
     <MudSpacer />
-
 </MudAppBar>
 
-<MudCard Class="mt-5 mx-2 ">
+<MudCard Class="mt-5 mx-2 page-content">
+    <!-- Changed: Added page-content class for CSS adjustments -->
     @if (string.IsNullOrEmpty(_recipe.ImageStream))
     {
         <MudElement Class="d-flex my-2 justify-content-center align-items-center" Style="height: 100%;">
             <MudButton StartIcon="@Icons.Material.Filled.CloudUpload" IconSize="Size.Medium" Variant="Variant.Text" Style="width:50%;" Color="Color.Inherit" OnClick="ImageUpload">Upload image</MudButton>
-        </MudElement>  
+        </MudElement>
     }
     else
     {
@@ -24,36 +24,31 @@
     <MudDivider />
 
     <MudCardActions Class="d-flex ">
-@*         <MudRating @bind-SelectedValue="_recipe.Rate" />
- *@        <MudSpacer />
-        <MudIconButton Variant="Variant.Text" DisableRipple="false" Icon="@Icons.Material.Filled.Settings" Color="Color.Inherit" OnClick="@(()=>OpenDrawer("Settings"))" />
+        <MudText Class="ml-4">Detail</MudText>
+        <MudSpacer />
+        <MudIconButton Variant="Variant.Text" DisableRipple="false" Icon="@Icons.Material.Filled.Settings" Color="Color.Inherit" OnClick="@(() => OpenDrawer(Options.Setting))" />
     </MudCardActions>
     <MudCardContent>
 
-        <MudElement Class="d-flex flex-column flex-grow-1 ma-1 mt-n4">
-
+        <MudElement Class="d-flex flex-column flex-grow-1 ma-1 mt-n4 content-wrapper">
+            <!-- Changed: Added content-wrapper class for CSS adjustments -->
             <MudTextField @bind-Value="_recipe.Description" TextUpdateSuppression="false" Immediate="true" AutoGrow Lines="3" InputType="InputType.Text" InputMode="InputMode.text" Variant="Variant.Outlined"></MudTextField>
-            <MudFab Class="mt-3" EndIcon="@Icons.Material.Filled.Save" OnClick="OnDescription" Label="Save" Color="Color.Primary" />
+            <MudFab Class="mt-3" EndIcon="@Icons.Material.Filled.Save" OnClick="OnSaveDescription" Label="Save" Color="Color.Primary" />
         </MudElement>
     </MudCardContent>
 </MudCard>
 
 @* ----Drawer---- *@
-<MudDrawer @bind-Open="@settingsDrawer" Anchor="Anchor.Bottom" Elevation="4" Variant="@DrawerVariant.Temporary" Color="Color.Inherit" Breakpoint="Breakpoint.LgAndUp">
-
+<MudDrawer @bind-Open="@settingsDrawer" Anchor="Anchor.Bottom" Elevation="4" Variant="DrawerVariant.Temporary" Color="Color.Inherit" Breakpoint="Breakpoint.LgAndUp">
     <MudElement Class="d-flex flex-column flex-grow-1 ma-4">
         <MudDrawerHeader Class="pl-1">
             <MudText Typo="Typo.h6">Settings</MudText>
         </MudDrawerHeader>
 
         <MudFab Class="mb-3" EndIcon="@Icons.Material.Filled.DriveFileRenameOutline" OnClick="ImageUpload" Label="Upload image" Color="Color.Tertiary" />
-
         <MudFab EndIcon="@Icons.Material.Filled.Delete" Label="Delete image" Color="Color.Error" OnClick="DeleteImage" />
-
     </MudElement>
 </MudDrawer>
-
-
 
 @code {
     [Parameter] public string Id { get; set; }
@@ -64,23 +59,18 @@
     protected async override Task OnInitializedAsync()
     {
         App.Current.On<Microsoft.Maui.Controls.PlatformConfiguration.Android>().UseWindowSoftInputModeAdjust(WindowSoftInputModeAdjust.Resize);
-
         _recipe = await Recipe.GetByIdAsync(Convert.ToInt32(Id));
-
     }
 
-    void OpenDrawer(string drawType)
+    void OpenDrawer(Options drawType)
     {
-
-        if (drawType == "Settings")
+        if (drawType == Options.Setting)
         {
             settingsDrawer = true;
-
         }
-
-
     }
-    private async Task OnDescription()
+
+    private async Task OnSaveDescription()
     {
         await Recipe.UpdateAsync(_recipe);
         nav.NavigateTo("/");
@@ -99,20 +89,12 @@
 
     private async Task ImageUpload()
     {
-        
-        var image = await MediaPicker.PickPhotoAsync(new MediaPickerOptions
-            {
-                Title = "Select a photo"
-            });
+        var image = await MediaPicker.PickPhotoAsync(new MediaPickerOptions { Title = "Select a photo" });
         if (image != null)
         {
-
             try
             {
                 var stream = await image.OpenReadAsync();
-
-                // using var reader = new StreamReader(stream);
-
                 byte[] result;
                 using (var streamReader = new MemoryStream())
                 {
@@ -123,19 +105,14 @@
                 imagePath = string.Format("data:image/png;base64,{0}", imagePath);
 
                 _recipe.ImageStream = imagePath;
-
                 await Recipe.UpdateAsync(_recipe);
-
                 settingsDrawer = false;
                 StateHasChanged();
-
             }
             catch (Exception ex)
             {
-
+                // Handle exception
             }
         }
-
     }
-
 }

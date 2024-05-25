@@ -14,6 +14,8 @@
 
 </MudAppBar>
 
+<MudCheckBox @bind-Value="@orderByFav"  Label="Show favorit first" LabelPosition="LabelPosition.Start"></MudCheckBox>
+
 @* ----Content---- *@
 @if (allrecipes == null || !allrecipes.Any() || hasError)
 {
@@ -26,9 +28,9 @@
 else
 {
 
-    @foreach (var item in allrecipes)
+    @foreach (var item in GetOrderedRecipe())
     {
-        <MudStack AlignItems="AlignItems.Center" Class="mt-5">
+        <MudStack AlignItems="AlignItems.Center" Class="mt-1">
 
             <MudCard Style="width: 90%;" Elevation="3" Class="card-container ">
                 @if (string.IsNullOrEmpty(item.ImageStream))
@@ -62,19 +64,29 @@ else
     }
 }
 @* ----Settings Drawer---- *@
-<MudDrawer @bind-Open="@settingsDrawer" Anchor="Anchor.Bottom" Elevation="4" Variant="@DrawerVariant.Temporary" Color="Color.Inherit" Breakpoint="Breakpoint.LgAndUp">
-
-
-    <MudElement Class="d-flex flex-column flex-grow-1 ma-4">
+<MudDrawer @bind-Open="@settingsDrawer" Anchor="Anchor.Bottom" Elevation="4" Variant="DrawerVariant.Temporary" Color="Color.Inherit" Breakpoint="Breakpoint.LgAndUp" Style="height: auto; max-height: 30vh;">
+    <MudElement Class="d-flex flex-column flex-grow-1 ma-4 justify-content-center align-items-center">
         <MudDrawerHeader Class="pl-1">
             <MudText Typo="Typo.h6">Settings</MudText>
         </MudDrawerHeader>
-        @*         <ShopDialog Recipe="@selectedRecipe" UpdateRecipe="UpdateRecipe" />
-        *@
-        <MudFab Class="mb-3" EndIcon="@Icons.Material.Filled.DriveFileRenameOutline" OnClick="@( ()=> OpenDrawer(Options.Edit))" Label="Edit name" Color="Color.Tertiary" />
 
-        <MudFab EndIcon="@Icons.Material.Filled.Delete" OnClick="@(()=>DeleteRecipe(selectedRecipe))" Label="Delete" Color="Color.Error" />
+        <MudElement Class="d-flex justify-space-around flex-grow-1 gap-8">
+            <MudElement Class="icon-wrapper">
+                <MudFab StartIcon="@Icons.Material.Filled.DriveFileRenameOutline" Size="Size.Large" Color="Color.Tertiary" OnClick="@( () => OpenDrawer(Options.Edit) )" />
+                <MudText Class="mt-2" Typo="Typo.body2" Align="Align.Center">Edit</MudText>
+            </MudElement>
 
+            <MudElement Class="icon-wrapper">
+                <MudFab StartIcon="@Icons.Material.Filled.Share" Size="Size.Large" Color="Color.Info" OnClick=" OnShareList" />
+                <MudText Class="mt-2" Typo="Typo.body2" Align="Align.Center">Share</MudText>
+            </MudElement>
+
+            <MudElement Class="icon-wrapper">
+                <MudFab StartIcon="@Icons.Material.Filled.Delete" Size="Size.Large" Color="Color.Error" OnClick="@(() => DeleteRecipe(selectedRecipe))" />
+                <MudText Class="mt-2" Typo="Typo.body2" Align="Align.Center">Delete</MudText>
+            </MudElement>
+
+        </MudElement>
     </MudElement>
 </MudDrawer>
 
@@ -96,6 +108,7 @@ else
 @code {
     // public Recipe _Recipe = new();
     private IEnumerable<Recipe>? allrecipes { get; set; }
+    bool orderByFav = false;
     bool newRecipeDrawer;
     bool settingsDrawer;
     bool editRecipeDrawer;
@@ -142,6 +155,33 @@ else
     {
         await UpdateRecipe(recipe);
 
+    }
+
+    private async Task OnShareList()
+    {
+
+        var itemList = new StringBuilder();
+        itemList.AppendLine($"{selectedRecipe.Title}");
+        itemList.AppendLine("Detail:");
+        itemList.AppendLine(selectedRecipe.Description);
+
+
+        await Share.RequestAsync(new ShareTextRequest
+            {
+
+                Text = itemList.ToString()
+            });
+
+
+    }
+
+    private IEnumerable<Recipe> GetOrderedRecipe()
+    {
+        if (orderByFav)
+        {
+            return allrecipes!.OrderByDescending(i => i.Favorite);
+        }
+        return allrecipes!;
     }
 
     private async Task LoadRecipesAsync()
