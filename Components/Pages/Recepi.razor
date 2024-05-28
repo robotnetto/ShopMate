@@ -33,19 +33,14 @@ else
         <MudStack AlignItems="AlignItems.Center" Class="mt-6">
 
             <MudCard Style="width: 90%;" Elevation="3" Class="card-container ">
-                @if (string.IsNullOrEmpty(item.ImageStream))
+                @if (!string.IsNullOrEmpty(item.ImageStream))
                 {
-                    <MudElement Class="d-flex my-2 justify-content-center align-items-center">
-                        <MudIcon Icon="@Icons.Material.Filled.HideImage" Size="Size.Large" />
-                    </MudElement>
-
-                }
-                else
-                {
-                    <a href="@($"description/{item.Id}")">
+                  <a href="@($"description/{item.Id}")">
                         <MudCardMedia Image="@item.ImageStream" Height="150" />
                     </a>
+
                 }
+                
                 <MudCardContent Class="mt-n3 ">
                     <MudButton Variant="Variant.Text" Href="@($"description/{item.Id}")" Color="Color.Inherit">@item.Title</MudButton>
 
