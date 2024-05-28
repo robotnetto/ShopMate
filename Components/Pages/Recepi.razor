@@ -14,7 +14,7 @@
 
 </MudAppBar>
 
-<MudCheckBox @bind-Value="@orderByFav"  Label="Show favorit first" LabelPosition="LabelPosition.Start"></MudCheckBox>
+<MudCheckBox class="mb-n4" @bind-Value="@orderByFav"  Label="Show favorit first" LabelPosition="LabelPosition.Start"></MudCheckBox>
 
 @* ----Content---- *@
 @if (allrecipes == null || !allrecipes.Any() || hasError)
@@ -30,7 +30,7 @@ else
 
     @foreach (var item in GetOrderedRecipe())
     {
-        <MudStack AlignItems="AlignItems.Center" Class="mt-1">
+        <MudStack AlignItems="AlignItems.Center" Class="mt-6">
 
             <MudCard Style="width: 90%;" Elevation="3" Class="card-container ">
                 @if (string.IsNullOrEmpty(item.ImageStream))

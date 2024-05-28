@@ -1,5 +1,6 @@
 ﻿@inject IRecipe Recipe
 @page "/description/{Id}"
+@using SkiaSharp
 @inject NavigationManager nav
 
 <MudAppBar Color="Color.Inherit">
@@ -101,7 +102,10 @@
                     stream.CopyTo(streamReader);
                     result = streamReader.ToArray();
                 }
-                var imagePath = Convert.ToBase64String(result);
+                // Resize the image using SkiaSharp
+                byte[] resizedImage = ResizeImage(result, 530, 310); // Resize to 800x800
+
+                var imagePath = Convert.ToBase64String(resizedImage);
                 imagePath = string.Format("data:image/png;base64,{0}", imagePath);
 
                 _recipe.ImageStream = imagePath;
@@ -112,6 +116,35 @@
             catch (Exception ex)
             {
                 // Handle exception
+            }
+        }
+    }
+    private byte[] ResizeImage(byte[] imageData, int width, int height)
+    {
+        using (var inputStream = new MemoryStream(imageData))
+        {
+            using (var original = SKBitmap.Decode(inputStream))
+            {
+                float aspectRatio = Math.Min((float)width / original.Width, (float)height / original.Height);
+
+                int newWidth = (int)(original.Width * aspectRatio);
+                int newHeight = (int)(original.Height * aspectRatio);
+
+                var info = new SKImageInfo(newWidth, newHeight);
+                using (var resized = original.Resize(info, SKFilterQuality.Medium))
+                {
+                    if (resized == null)
+                        return imageData;
+
+                    using (var image = SKImage.FromBitmap(resized))
+                    {
+                        using (var outputStream = new MemoryStream())
+                        {
+                            image.Encode(SKEncodedImageFormat.Png, 75).SaveTo(outputStream);
+                            return outputStream.ToArray();
+                        }
+                    }
+                }
             }
         }
     }
